@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل الحضور - هاكاثون AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('checkin') }}">هاكاثون AI - الحضور</a>
+            <div>
+                <a class="btn btn-outline-light btn-sm" href="{{ url_for('checkin') }}">تسجيل الحضور</a>
+                <a class="btn btn-outline-info btn-sm" href="{{ url_for('stats') }}">الإحصائيات</a>
+                <a class="btn btn-outline-warning btn-sm"
+                href="{{ url_for('students_list', status='present') }}">
+                    قائمة الحاضرين
+                </a>
+                <a class="btn btn-outline-danger btn-sm"
+                href="{{ url_for('students_list', status='absent') }}">
+                    قائمة غير الحاضرين
+                </a>
+
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+        <div class="mb-3">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'success' if category == 'success' else 'warning' }} alert-dismissible fade show"
+                role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="إغلاق"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <h1 class="mb-4">تسجيل الحضور</h1>
+
+        <form method="get" action="{{ url_for('checkin') }}" class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label class="form-label">بحث بالاسم أو اسم الفريق أو رقم الفريق</label>
+                <input type="text" name="q" class="form-control" value="{{ q }}"
+                    placeholder="اكتب جزء من الاسم أو رقم الفريق">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">غرفة التحكيم</label>
+                <select name="room" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="A" {% if room=='A' %}selected{% endif %}>A</option>
+                    <option value="B" {% if room=='B' %}selected{% endif %}>B</option>
+                    <option value="C" {% if room=='C' %}selected{% endif %}>C</option>
+                    <option value="D" {% if room=='D' %}selected{% endif %}>D</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">بحث / تصفية</button>
+            </div>
+        </form>
+
+        {% if students %}
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>الغرفة</th>
+                        <th>رقم الفريق</th>
+                        <th>اسم الفريق</th>
+                        <th>اسم الطالب</th>
+                        <th>الحالة</th>
+                        <th>وقت التسجيل</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in students %}
+                    <tr>
+                        <td><span class="badge bg-secondary fs-6">{{ s['room'] }}</span></td>
+                        <td>{{ s['team_id'] }}</td>
+                        <td>{{ s['team_name'] }}</td>
+                        <td>{{ s['name'] }}</td>
+                        <td>
+                            {% if s['checked_in'] %}
+                            <span class="badge bg-success">حضر</span>
+                            {% else %}
+                            <span class="badge bg-danger">لم يحضر بعد</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if s['checkin_time'] %}
+                            {{ s['checkin_time'] }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not s['checked_in'] %}
+                            <div class="d-flex gap-1">
+                                <form method="post" action="{{ url_for('checkin') }}">
+                                    <input type="hidden" name="student_id" value="{{ s['id'] }}">
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        الطالب
+                                    </button>
+                                </form>
+
+                                <form method="post" action="{{ url_for('checkin') }}">
+                                    <input type="hidden" name="team_id" value="{{ s['team_id'] }}">
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        الفريق كامل
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <span class="text-muted">تم تسجيله</span>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            لا توجد بيانات طلاب مطابقة لبحثك حاليًا.
+        </div>
+        {% endif %}
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

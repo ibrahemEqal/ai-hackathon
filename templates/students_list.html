@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>قائمة الطلاب - هاكاثون AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('checkin') }}">هاكاثون AI - قائمة الطلاب</a>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-light btn-sm" href="{{ url_for('checkin') }}">تسجيل الحضور</a>
+            <a class="btn btn-outline-info btn-sm" href="{{ url_for('stats') }}">الإحصائيات</a>
+            <a class="btn btn-outline-warning btn-sm"
+               href="{{ url_for('students_list', status='present') }}">
+                الحاضرون
+            </a>
+            <a class="btn btn-outline-danger btn-sm"
+               href="{{ url_for('students_list', status='absent') }}">
+                غير الحاضرين
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <h1 class="mb-4">
+        {% if status == 'present' %}
+            قائمة الطلاب الحاضرين
+        {% elif status == 'absent' %}
+            قائمة الطلاب الذين لم يحضروا
+        {% else %}
+            قائمة جميع الطلاب
+        {% endif %}
+    </h1>
+
+    <!-- نموذج التصفية حسب الغرفة -->
+    <form method="get" action="{{ url_for('students_list') }}" class="row g-3 mb-4">
+        <input type="hidden" name="status" value="{{ status }}">
+        <div class="col-md-4">
+            <label class="form-label">غرفة التحكيم</label>
+            <select name="room" class="form-select">
+                <option value="">كل الغرف</option>
+                <option value="A" {% if room == 'A' %}selected{% endif %}>A</option>
+                <option value="B" {% if room == 'B' %}selected{% endif %}>B</option>
+                <option value="C" {% if room == 'C' %}selected{% endif %}>C</option>
+                <option value="D" {% if room == 'D' %}selected{% endif %}>D</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">تطبيق التصفية</button>
+        </div>
+    </form>
+
+    {% if students %}
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>الغرفة</th>
+                    <th>رقم الفريق</th>
+                    <th>اسم الفريق</th>
+                    <th>اسم الطالب</th>
+                    <th>الحالة</th>
+                    <th>وقت تسجيل الحضور</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td><span class="badge bg-secondary fs-6">{{ s['room'] }}</span></td>
+                    <td>{{ s['team_id'] }}</td>
+                    <td>{{ s['team_name'] }}</td>
+                    <td>{{ s['name'] }}</td>
+                    <td>
+                        {% if s['checked_in'] %}
+                            <span class="badge bg-success">حضر</span>
+                        {% else %}
+                            <span class="badge bg-danger">لم يحضر</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if s['checkin_time'] %}
+                            {{ s['checkin_time'] }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-info">
+            لا يوجد طلاب مطابقين للفلتر الحالي.
+        </div>
+    {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
