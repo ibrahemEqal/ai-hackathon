@@ -83,7 +83,7 @@ def init_db():
             if os.path.exists(CSV_FILE):
                 load_from_csv(conn, CSV_FILE)
             else:
-                print(f"⚠️ لا يوجد Excel مناسب ولا ملف {CSV_FILE}. سيتم إنشاء الجداول بدون بيانات.")
+                print(f" لا يوجد Excel مناسب ولا ملف {CSV_FILE}. سيتم إنشاء الجداول بدون بيانات.")
 
     conn.commit()
     conn.close()
@@ -138,7 +138,7 @@ def try_load_from_excels(conn) -> bool:
             continue
 
         any_file = True
-        print(f"📥 تحميل من Excel: {path} (Room {room})")
+        print(f" تحميل من Excel: {path} (Room {room})")
 
         wb = load_workbook(path, data_only=True)
 
@@ -175,7 +175,7 @@ def try_load_from_excels(conn) -> bool:
         conn.commit()
 
     if any_file:
-        print("✅ تم تحميل بيانات الإكسل.")
+        print(" تم تحميل بيانات الإكسل.")
         return True
 
     return False
@@ -203,7 +203,7 @@ def load_from_csv(conn, csv_path):
                 insert_student_if_needed(conn, student_name, team_id, university)
 
     conn.commit()
-    print("✅ تم تحميل البيانات من CSV بنجاح.")
+    print(" تم تحميل البيانات من CSV بنجاح.")
 
 
 init_db()
@@ -238,7 +238,7 @@ def checkin():
                     (team_id_int,),
                 )
                 conn.commit()
-                flash("تم إلغاء حضور الفريق ✅" if cur.rowcount else "الفريق غير مسجل حضور أصلًا.", "info" if cur.rowcount == 0 else "success")
+                flash("تم إلغاء حضور الفريق " if cur.rowcount else "الفريق غير مسجل حضور أصلًا.", "info" if cur.rowcount == 0 else "success")
 
             else:
                 cur = conn.execute(
@@ -252,7 +252,7 @@ def checkin():
                     (team_id_int,),
                 )
                 conn.commit()
-                flash("تم تسجيل حضور الفريق كامل ✅" if cur.rowcount else "الفريق كان مسجل حضور مسبقًا.", "info" if cur.rowcount == 0 else "success")
+                flash("تم تسجيل حضور الفريق كامل " if cur.rowcount else "الفريق كان مسجل حضور مسبقًا.", "info" if cur.rowcount == 0 else "success")
 
         elif student_id and str(student_id).isdigit():
             student_id_int = int(student_id)
@@ -269,7 +269,7 @@ def checkin():
                     (student_id_int,),
                 )
                 conn.commit()
-                flash("تم إلغاء حضور الطالب ✅" if cur.rowcount else "الطالب غير مسجل حضور أصلًا.", "info" if cur.rowcount == 0 else "success")
+                flash("تم إلغاء حضور الطالب " if cur.rowcount else "الطالب غير مسجل حضور أصلًا.", "info" if cur.rowcount == 0 else "success")
 
             else:
                 cur = conn.execute(
@@ -283,7 +283,7 @@ def checkin():
                     (student_id_int,),
                 )
                 conn.commit()
-                flash("تم تسجيل حضور الطالب ✅" if cur.rowcount else "الطالب كان مسجل حضور مسبقًا.", "info" if cur.rowcount == 0 else "success")
+                flash("تم تسجيل حضور الطالب " if cur.rowcount else "الطالب كان مسجل حضور مسبقًا.", "info" if cur.rowcount == 0 else "success")
 
         conn.close()
         return redirect(url_for("checkin"))
@@ -416,6 +416,7 @@ if __name__ == "__main__":
     if args.reset_db and os.path.exists(DB_NAME):
         os.remove(DB_NAME)
         init_db()
-        print("🧹 تم إعادة بناء قاعدة البيانات.")
+        print(" تم إعادة بناء قاعدة البيانات.")
 
-app.run(host="0.0.0.0", port=5000, debug=not args.reset_db, use_reloader=not args.reset_db)
+    app.run(host="0.0.0.0", port=5000, debug=not args.reset_db, use_reloader=not args.reset_db)
+
