@@ -125,11 +125,7 @@ def try_load_from_excels(conn) -> bool:
             continue
 
         any_file = True
-<<<<<<< HEAD
-        print(f" تحميل من Excel: {path} (Room {room})")
 
-=======
->>>>>>> 1baef8f (Update rooms/excel files and templates)
         wb = load_workbook(path, data_only=True)
 
         for ws in wb.worksheets:
@@ -164,15 +160,7 @@ def try_load_from_excels(conn) -> bool:
 
         conn.commit()
 
-<<<<<<< HEAD
-    if any_file:
-        print(" تم تحميل بيانات الإكسل.")
-        return True
 
-    return False
-=======
-    return any_file
->>>>>>> 1baef8f (Update rooms/excel files and templates)
 
 
 def load_from_csv(conn, csv_path):
@@ -193,10 +181,7 @@ def load_from_csv(conn, csv_path):
                 insert_student_if_needed(conn, student_name, team_id, university)
 
     conn.commit()
-<<<<<<< HEAD
-    print(" تم تحميل البيانات من CSV بنجاح.")
-=======
->>>>>>> 1baef8f (Update rooms/excel files and templates)
+
 
 
 init_db()
@@ -231,15 +216,7 @@ def checkin():
                     (team_id_int,),
                 )
                 conn.commit()
-<<<<<<< HEAD
-                flash("تم إلغاء حضور الفريق " if cur.rowcount else "الفريق غير مسجل حضور أصلًا.", "info" if cur.rowcount == 0 else "success")
 
-=======
-                flash(
-                    "تم إلغاء حضور الفريق ✅" if cur.rowcount else "الفريق غير مسجل حضور أصلًا.",
-                    "success" if cur.rowcount else "info",
-                )
->>>>>>> 1baef8f (Update rooms/excel files and templates)
             else:
                 cur = conn.execute(
                     """
@@ -252,14 +229,7 @@ def checkin():
                     (team_id_int,),
                 )
                 conn.commit()
-<<<<<<< HEAD
-                flash("تم تسجيل حضور الفريق كامل " if cur.rowcount else "الفريق كان مسجل حضور مسبقًا.", "info" if cur.rowcount == 0 else "success")
-=======
-                flash(
-                    "تم تسجيل حضور الفريق كامل ✅" if cur.rowcount else "الفريق كان مسجل حضور مسبقًا.",
-                    "success" if cur.rowcount else "info",
-                )
->>>>>>> 1baef8f (Update rooms/excel files and templates)
+
 
         elif student_id and str(student_id).isdigit():
             student_id_int = int(student_id)
@@ -276,15 +246,7 @@ def checkin():
                     (student_id_int,),
                 )
                 conn.commit()
-<<<<<<< HEAD
-                flash("تم إلغاء حضور الطالب " if cur.rowcount else "الطالب غير مسجل حضور أصلًا.", "info" if cur.rowcount == 0 else "success")
 
-=======
-                flash(
-                    "تم إلغاء حضور الطالب ✅" if cur.rowcount else "الطالب غير مسجل حضور أصلًا.",
-                    "success" if cur.rowcount else "info",
-                )
->>>>>>> 1baef8f (Update rooms/excel files and templates)
             else:
                 cur = conn.execute(
                     """
@@ -297,15 +259,6 @@ def checkin():
                     (student_id_int,),
                 )
                 conn.commit()
-<<<<<<< HEAD
-                flash("تم تسجيل حضور الطالب " if cur.rowcount else "الطالب كان مسجل حضور مسبقًا.", "info" if cur.rowcount == 0 else "success")
-=======
-                flash(
-                    "تم تسجيل حضور الطالب ✅" if cur.rowcount else "الطالب كان مسجل حضور مسبقًا.",
-                    "success" if cur.rowcount else "info",
-                )
->>>>>>> 1baef8f (Update rooms/excel files and templates)
-
         conn.close()
         return redirect(url_for("checkin"))
 
@@ -433,12 +386,8 @@ if __name__ == "__main__":
     if args.reset_db and os.path.exists(DB_NAME):
         os.remove(DB_NAME)
         init_db()
-<<<<<<< HEAD
-        print(" تم إعادة بناء قاعدة البيانات.")
 
     app.run(host="0.0.0.0", port=5000, debug=not args.reset_db, use_reloader=not args.reset_db)
 
-=======
-
     app.run(host="0.0.0.0", port=5000, debug=not args.reset_db, use_reloader=not args.reset_db)
->>>>>>> 1baef8f (Update rooms/excel files and templates)
+
