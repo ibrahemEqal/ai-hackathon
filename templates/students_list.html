@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <title>قائمة الطلاب - هاكاثون AI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
@@ -17,14 +14,8 @@
         <div class="d-flex gap-2">
             <a class="btn btn-outline-light btn-sm" href="{{ url_for('checkin') }}">تسجيل الحضور</a>
             <a class="btn btn-outline-info btn-sm" href="{{ url_for('stats') }}">الإحصائيات</a>
-            <a class="btn btn-outline-warning btn-sm"
-               href="{{ url_for('students_list', status='present') }}">
-                الحاضرون
-            </a>
-            <a class="btn btn-outline-danger btn-sm"
-               href="{{ url_for('students_list', status='absent') }}">
-                غير الحاضرين
-            </a>
+            <a class="btn btn-outline-warning btn-sm" href="{{ url_for('students_list', status='present') }}">الحاضرون</a>
+            <a class="btn btn-outline-danger btn-sm" href="{{ url_for('students_list', status='absent') }}">غير الحاضرين</a>
         </div>
     </div>
 </nav>
@@ -41,17 +32,15 @@
         {% endif %}
     </h1>
 
-    <!-- نموذج التصفية حسب الغرفة -->
     <form method="get" action="{{ url_for('students_list') }}" class="row g-3 mb-4">
         <input type="hidden" name="status" value="{{ status }}">
         <div class="col-md-4">
             <label class="form-label">غرفة التحكيم</label>
             <select name="room" class="form-select">
                 <option value="">كل الغرف</option>
-                <option value="A" {% if room == 'A' %}selected{% endif %}>A</option>
-                <option value="B" {% if room == 'B' %}selected{% endif %}>B</option>
-                <option value="C" {% if room == 'C' %}selected{% endif %}>C</option>
-                <option value="D" {% if room == 'D' %}selected{% endif %}>D</option>
+                {% for r in rooms %}
+                    <option value="{{ r }}" {% if room == r %}selected{% endif %}>{{ r }}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="col-md-3 d-flex align-items-end">
@@ -68,6 +57,7 @@
                     <th>رقم الفريق</th>
                     <th>اسم الفريق</th>
                     <th>اسم الطالب</th>
+                    <th>الجامعة</th>
                     <th>الحالة</th>
                     <th>وقت تسجيل الحضور</th>
                 </tr>
@@ -79,6 +69,7 @@
                     <td>{{ s['team_id'] }}</td>
                     <td>{{ s['team_name'] }}</td>
                     <td>{{ s['name'] }}</td>
+                    <td>{{ s['university'] or '-' }}</td>
                     <td>
                         {% if s['checked_in'] %}
                             <span class="badge bg-success">حضر</span>

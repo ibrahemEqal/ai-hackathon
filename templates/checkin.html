@@ -15,12 +15,8 @@
         <div>
             <a class="btn btn-outline-light btn-sm" href="{{ url_for('checkin') }}">تسجيل الحضور</a>
             <a class="btn btn-outline-info btn-sm" href="{{ url_for('stats') }}">الإحصائيات</a>
-            <a class="btn btn-outline-warning btn-sm" href="{{ url_for('students_list', status='present') }}">
-                قائمة الحاضرين
-            </a>
-            <a class="btn btn-outline-danger btn-sm" href="{{ url_for('students_list', status='absent') }}">
-                قائمة غير الحاضرين
-            </a>
+            <a class="btn btn-outline-warning btn-sm" href="{{ url_for('students_list', status='present') }}">قائمة الحاضرين</a>
+            <a class="btn btn-outline-danger btn-sm" href="{{ url_for('students_list', status='absent') }}">قائمة غير الحاضرين</a>
         </div>
     </div>
 </nav>
@@ -41,23 +37,20 @@
 {% endif %}
 {% endwith %}
 
-
     <h1 class="mb-4">تسجيل الحضور</h1>
 
     <form method="get" action="{{ url_for('checkin') }}" class="row g-3 mb-4">
         <div class="col-md-6">
-            <label class="form-label">بحث بالاسم أو اسم الفريق أو رقم الفريق</label>
-            <input type="text" name="q" class="form-control" value="{{ q }}"
-                   placeholder="اكتب جزء من الاسم أو رقم الفريق">
+            <label class="form-label">بحث بالاسم أو الجامعة أو اسم الفريق أو رقم الفريق</label>
+            <input type="text" name="q" class="form-control" value="{{ q }}" placeholder="اكتب جزء من الاسم أو رقم الفريق">
         </div>
         <div class="col-md-3">
             <label class="form-label">غرفة التحكيم</label>
             <select name="room" class="form-select">
                 <option value="">الكل</option>
-                <option value="A" {% if room=='A' %}selected{% endif %}>A</option>
-                <option value="B" {% if room=='B' %}selected{% endif %}>B</option>
-                <option value="C" {% if room=='C' %}selected{% endif %}>C</option>
-                <option value="D" {% if room=='D' %}selected{% endif %}>D</option>
+                {% for r in rooms %}
+                    <option value="{{ r }}" {% if room==r %}selected{% endif %}>{{ r }}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="col-md-3 d-flex align-items-end">
@@ -74,6 +67,7 @@
                     <th>رقم الفريق</th>
                     <th>اسم الفريق</th>
                     <th>اسم الطالب</th>
+                    <th>الجامعة</th>
                     <th>الحالة</th>
                     <th>وقت التسجيل</th>
                     <th>إجراء</th>
@@ -86,8 +80,8 @@
                     <td><span class="badge bg-secondary fs-6">{{ s['room'] }}</span></td>
                     <td>{{ s['team_id'] }}</td>
                     <td>{{ s['team_name'] }}</td>
-                    <td>{{ s['university'] }}</td> 
                     <td>{{ s['name'] }}</td>
+                    <td>{{ s['university'] or '-' }}</td>
                     <td>
                         {% if s['checked_in'] %}
                             <span class="badge bg-success">حضر</span>
@@ -104,50 +98,35 @@
                     </td>
                     <td>
                         <div class="d-flex flex-wrap gap-1">
-
                             {% if not s['checked_in'] %}
                             <form method="post" action="{{ url_for('checkin') }}">
                                 <input type="hidden" name="student_id" value="{{ s['id'] }}">
                                 <input type="hidden" name="action" value="checkin">
-                                <button type="submit" class="btn btn-sm btn-success">
-                                <input type="hidden" name="action" value="checkout">
-
-                                    تسجيل الطالب
-                                </button>
+                                <button type="submit" class="btn btn-sm btn-success">تسجيل الطالب</button>
                             </form>
                             {% else %}
-                            <form method="post" action="{{ url_for('checkin') }}"
-                                  onsubmit="return confirm('إلغاء حضور هذا الطالب؟');">
+                            <form method="post" action="{{ url_for('checkin') }}" onsubmit="return confirm('إلغاء حضور هذا الطالب؟');">
                                 <input type="hidden" name="student_id" value="{{ s['id'] }}">
                                 <input type="hidden" name="action" value="checkout">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    إلغاء الطالب
-                                </button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger">إلغاء الطالب</button>
                             </form>
                             {% endif %}
 
                             {% if s['team_id'] != ns.last_team %}
                                 {% set ns.last_team = s['team_id'] %}
 
-                                <form method="post" action="{{ url_for('checkin') }}"
-                                      onsubmit="return confirm('تسجيل حضور الفريق كامل؟');">
+                                <form method="post" action="{{ url_for('checkin') }}" onsubmit="return confirm('تسجيل حضور الفريق كامل؟');">
                                     <input type="hidden" name="team_id" value="{{ s['team_id'] }}">
                                     <input type="hidden" name="action" value="checkin">
-                                    <button type="submit" class="btn btn-sm btn-primary">
-                                        تسجيل الفريق
-                                    </button>
+                                    <button type="submit" class="btn btn-sm btn-primary">تسجيل الفريق</button>
                                 </form>
 
-                                <form method="post" action="{{ url_for('checkin') }}"
-                                      onsubmit="return confirm('إلغاء حضور الفريق كامل؟');">
+                                <form method="post" action="{{ url_for('checkin') }}" onsubmit="return confirm('إلغاء حضور الفريق كامل؟');">
                                     <input type="hidden" name="team_id" value="{{ s['team_id'] }}">
                                     <input type="hidden" name="action" value="checkout">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        إلغاء الفريق
-                                    </button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">إلغاء الفريق</button>
                                 </form>
                             {% endif %}
-
                         </div>
                     </td>
                 </tr>
@@ -156,9 +135,7 @@
         </table>
     </div>
     {% else %}
-    <div class="alert alert-info">
-        لا توجد بيانات طلاب مطابقة لبحثك حاليًا.
-    </div>
+    <div class="alert alert-info">لا توجد بيانات طلاب مطابقة لبحثك حاليًا.</div>
     {% endif %}
 
 </div>

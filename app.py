@@ -1,22 +1,21 @@
 import csv
 import os
 import sqlite3
-from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, url_for, flash
-
 from openpyxl import load_workbook
-
 
 DB_NAME = "attendance.db"
 CSV_FILE = "students.csv"
 
 EXCEL_ROOM_FILES = {
-    "A": "A.xlsx",
-    "B": "B.xlsx",
-    "C": "C.xlsx",
-    "D": "D.xlsx",
+    "Neural": "Neural.xlsx",
+    "Qubit": "Qubit.xlsx",
+    "Quantum Core": "QuantumCore.xlsx",
+    "Intelligence": "Intelligence.xlsx",
 }
+
+VALID_ROOMS = tuple(EXCEL_ROOM_FILES.keys())
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
@@ -30,10 +29,6 @@ def get_db_connection():
 
 
 def ensure_column_exists(conn, table_name: str, column_name: str, column_def: str):
-    """
-    إضافة عمود جديد إذا غير موجود (migration خفيف).
-    column_def مثال: "university TEXT"
-    """
     cols = conn.execute(f"PRAGMA table_info({table_name});").fetchall()
     existing = {c["name"] for c in cols}
     if column_name not in existing:
@@ -41,7 +36,6 @@ def ensure_column_exists(conn, table_name: str, column_name: str, column_def: st
 
 
 def init_db():
-    """إنشاء الجداول + تعبئتها من ملف Excel/CSV لو فاضية."""
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
@@ -72,6 +66,8 @@ def init_db():
         """
     )
 
+    ensure_column_exists(conn, "students", "checked_in", "checked_in INTEGER NOT NULL DEFAULT 0")
+    ensure_column_exists(conn, "students", "checkin_time", "checkin_time TEXT")
     ensure_column_exists(conn, "students", "university", "university TEXT")
 
     cur.execute("SELECT COUNT(*) AS c FROM students;")
@@ -82,8 +78,11 @@ def init_db():
         if not loaded:
             if os.path.exists(CSV_FILE):
                 load_from_csv(conn, CSV_FILE)
+<<<<<<< HEAD
             else:
                 print(f" لا يوجد Excel مناسب ولا ملف {CSV_FILE}. سيتم إنشاء الجداول بدون بيانات.")
+=======
+>>>>>>> 1baef8f (Update rooms/excel files and templates)
 
     conn.commit()
     conn.close()
@@ -92,8 +91,7 @@ def init_db():
 def clean_cell(x):
     if x is None:
         return ""
-    s = str(x).strip()
-    return s
+    return str(x).strip()
 
 
 def insert_team_if_needed(conn, team_id: int, team_name: str, room: str):
@@ -120,17 +118,6 @@ def insert_student_if_needed(conn, student_name: str, team_id: int, university: 
 
 
 def try_load_from_excels(conn) -> bool:
-    """
-    تحميل البيانات من 4 ملفات Excel.
-    شكل الصف حسب الصورة:
-    A: team_id
-    B: name1
-    C: university1
-    D: name2
-    E: university2
-    F: (اختياري) team_name
-    G..: مواعيد (نتجاهلها)
-    """
     any_file = False
 
     for room, path in EXCEL_ROOM_FILES.items():
@@ -138,8 +125,11 @@ def try_load_from_excels(conn) -> bool:
             continue
 
         any_file = True
+<<<<<<< HEAD
         print(f" تحميل من Excel: {path} (Room {room})")
 
+=======
+>>>>>>> 1baef8f (Update rooms/excel files and templates)
         wb = load_workbook(path, data_only=True)
 
         for ws in wb.worksheets:
@@ -174,36 +164,39 @@ def try_load_from_excels(conn) -> bool:
 
         conn.commit()
 
+<<<<<<< HEAD
     if any_file:
         print(" تم تحميل بيانات الإكسل.")
         return True
 
     return False
+=======
+    return any_file
+>>>>>>> 1baef8f (Update rooms/excel files and templates)
 
 
 def load_from_csv(conn, csv_path):
-    """
-    CSV القديم (اختياري كـ fallback)
-    الأعمدة المتوقعة:
-    team_id, team_name, student_name, room
-    + optional: university
-    """
-    print(f"📥 تحميل البيانات من {csv_path} ...")
     with open(csv_path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             team_id = int(row["team_id"])
-            team_name = row.get("team_name", "").strip() or f"فريق {team_id}"
-            room = row.get("room", "").strip().upper() or "A"
-            student_name = row.get("student_name", "").strip()
-            university = row.get("university", "").strip()
+            team_name = (row.get("team_name") or "").strip() or f"فريق {team_id}"
+            room = (row.get("room") or "").strip() or "Neural"
+            student_name = (row.get("student_name") or "").strip()
+            university = (row.get("university") or "").strip()
+
+            if room not in VALID_ROOMS:
+                room = "Neural"
 
             insert_team_if_needed(conn, team_id, team_name, room)
             if student_name:
                 insert_student_if_needed(conn, student_name, team_id, university)
 
     conn.commit()
+<<<<<<< HEAD
     print(" تم تحميل البيانات من CSV بنجاح.")
+=======
+>>>>>>> 1baef8f (Update rooms/excel files and templates)
 
 
 init_db()
@@ -238,8 +231,15 @@ def checkin():
                     (team_id_int,),
                 )
                 conn.commit()
+<<<<<<< HEAD
                 flash("تم إلغاء حضور الفريق " if cur.rowcount else "الفريق غير مسجل حضور أصلًا.", "info" if cur.rowcount == 0 else "success")
 
+=======
+                flash(
+                    "تم إلغاء حضور الفريق ✅" if cur.rowcount else "الفريق غير مسجل حضور أصلًا.",
+                    "success" if cur.rowcount else "info",
+                )
+>>>>>>> 1baef8f (Update rooms/excel files and templates)
             else:
                 cur = conn.execute(
                     """
@@ -252,7 +252,14 @@ def checkin():
                     (team_id_int,),
                 )
                 conn.commit()
+<<<<<<< HEAD
                 flash("تم تسجيل حضور الفريق كامل " if cur.rowcount else "الفريق كان مسجل حضور مسبقًا.", "info" if cur.rowcount == 0 else "success")
+=======
+                flash(
+                    "تم تسجيل حضور الفريق كامل ✅" if cur.rowcount else "الفريق كان مسجل حضور مسبقًا.",
+                    "success" if cur.rowcount else "info",
+                )
+>>>>>>> 1baef8f (Update rooms/excel files and templates)
 
         elif student_id and str(student_id).isdigit():
             student_id_int = int(student_id)
@@ -269,8 +276,15 @@ def checkin():
                     (student_id_int,),
                 )
                 conn.commit()
+<<<<<<< HEAD
                 flash("تم إلغاء حضور الطالب " if cur.rowcount else "الطالب غير مسجل حضور أصلًا.", "info" if cur.rowcount == 0 else "success")
 
+=======
+                flash(
+                    "تم إلغاء حضور الطالب ✅" if cur.rowcount else "الطالب غير مسجل حضور أصلًا.",
+                    "success" if cur.rowcount else "info",
+                )
+>>>>>>> 1baef8f (Update rooms/excel files and templates)
             else:
                 cur = conn.execute(
                     """
@@ -283,13 +297,20 @@ def checkin():
                     (student_id_int,),
                 )
                 conn.commit()
+<<<<<<< HEAD
                 flash("تم تسجيل حضور الطالب " if cur.rowcount else "الطالب كان مسجل حضور مسبقًا.", "info" if cur.rowcount == 0 else "success")
+=======
+                flash(
+                    "تم تسجيل حضور الطالب ✅" if cur.rowcount else "الطالب كان مسجل حضور مسبقًا.",
+                    "success" if cur.rowcount else "info",
+                )
+>>>>>>> 1baef8f (Update rooms/excel files and templates)
 
         conn.close()
         return redirect(url_for("checkin"))
 
     q = request.args.get("q", "").strip()
-    room = request.args.get("room", "").strip().upper()
+    room = request.args.get("room", "").strip()
 
     sql = """
         SELECT
@@ -319,7 +340,7 @@ def checkin():
         like = f"%{q}%"
         params += [like, like, like, like]
 
-    if room in ("A", "B", "C", "D"):
+    if room in VALID_ROOMS:
         sql += " AND teams.room = ?"
         params.append(room)
 
@@ -328,7 +349,7 @@ def checkin():
     students = conn.execute(sql, params).fetchall()
     conn.close()
 
-    return render_template("checkin.html", students=students, q=q, room=room)
+    return render_template("checkin.html", students=students, q=q, room=room, rooms=VALID_ROOMS)
 
 
 @app.route("/students")
@@ -336,7 +357,7 @@ def students_list():
     conn = get_db_connection()
 
     status = request.args.get("status", "all")
-    room = request.args.get("room", "").strip().upper()
+    room = request.args.get("room", "").strip()
 
     sql = """
         SELECT
@@ -359,7 +380,7 @@ def students_list():
     elif status == "absent":
         sql += " AND students.checked_in = 0"
 
-    if room in ("A", "B", "C", "D"):
+    if room in VALID_ROOMS:
         sql += " AND teams.room = ?"
         params.append(room)
 
@@ -368,12 +389,7 @@ def students_list():
     students = conn.execute(sql, params).fetchall()
     conn.close()
 
-    return render_template(
-        "students_list.html",
-        students=students,
-        status=status,
-        room=room,
-    )
+    return render_template("students_list.html", students=students, status=status, room=room, rooms=VALID_ROOMS)
 
 
 @app.route("/stats")
@@ -403,6 +419,7 @@ def stats():
         total_students=total_students,
         total_checked_in=total_checked_in,
         per_room=per_room,
+        rooms=VALID_ROOMS,
     )
 
 
@@ -410,13 +427,18 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--reset-db", action="store_true", help="يحذف قاعدة البيانات ويعيد الاستيراد من جديد")
+    parser.add_argument("--reset-db", action="store_true")
     args = parser.parse_args()
 
     if args.reset_db and os.path.exists(DB_NAME):
         os.remove(DB_NAME)
         init_db()
+<<<<<<< HEAD
         print(" تم إعادة بناء قاعدة البيانات.")
 
     app.run(host="0.0.0.0", port=5000, debug=not args.reset_db, use_reloader=not args.reset_db)
 
+=======
+
+    app.run(host="0.0.0.0", port=5000, debug=not args.reset_db, use_reloader=not args.reset_db)
+>>>>>>> 1baef8f (Update rooms/excel files and templates)
