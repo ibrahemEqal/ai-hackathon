@@ -6,6 +6,10 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from openpyxl import load_workbook
 
 DB_NAME = "attendance.db"
+if os.environ.get("RESET_DB_ON_START") == "1":
+    if os.path.exists(DB_NAME):
+        os.remove(DB_NAME)
+
 CSV_FILE = "students.csv"
 
 EXCEL_ROOM_FILES = {
