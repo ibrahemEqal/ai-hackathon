@@ -82,11 +82,7 @@ def init_db():
         if not loaded:
             if os.path.exists(CSV_FILE):
                 load_from_csv(conn, CSV_FILE)
-<<<<<<< HEAD
-            else:
-                print(f" لا يوجد Excel مناسب ولا ملف {CSV_FILE}. سيتم إنشاء الجداول بدون بيانات.")
-=======
->>>>>>> 1baef8f (Update rooms/excel files and templates)
+
 
     conn.commit()
     conn.close()
